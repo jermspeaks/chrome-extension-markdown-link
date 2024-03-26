@@ -2,10 +2,26 @@
 <html>
   <head>
     <title>Copy to Markdown</title>
+    <style>
+      body,
+      html {
+        width: 640px;
+        height: 400px;
+        margin: 16px;
+        padding: 0;
+      }
+      header {
+        text-align: center;
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+      /* Add additional styling as needed */
+    </style>
   </head>
   <body>
+    <header>Generate Markdown Link</header>
     <button id="copyBtn">Generate Markdown Link</button>
-    <textarea id="markdownLink" style="width: 100%"></textarea>
+    <textarea id="markdownLink" style="width: 575px; height: 100px"></textarea>
     <button id="copyToClipboard" style="display: none">
       Copy to Clipboard
     </button>

@@ -8,9 +8,27 @@ function cleanURL(url, callback) {
   );
 }
 
+// Function that formats the title and URL into Markdown, adding an exclamation point for YouTube or Twitter links
+function formatMarkdown(title, cleanUrl) {
+  // Array of domain patterns to match for special formatting
+  const specialDomains = ["youtube.com", "twitter.com"];
+
+  // Check if the URL matches any special domains
+  const isSpecialDomain = specialDomains.some((domain) =>
+    cleanUrl.includes(domain)
+  );
+
+  // Format the markdown based on whether it's a special domain
+  let markdownFormat = isSpecialDomain
+    ? `![${title}](${cleanUrl})`
+    : `[${title}](${cleanUrl})`;
+
+  return markdownFormat;
+}
+
 // Function to format the URL and title in Markdown and copy to clipboard
 function copyMarkdownLink(title, cleanUrl) {
-  const markdownFormat = `[${title}](${cleanUrl})`;
+  const markdownFormat = formatMarkdown(title, cleanUrl);
   navigator.clipboard.writeText(markdownFormat).then(
     function () {
       // If copying is successful, show a confirmation
@@ -90,7 +108,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     const url = window.location.href;
 
     cleanURL(url, (cleanedUrl) => {
-      const markdownFormat = `[${title}](${cleanedUrl})`;
+      const markdownFormat = formatMarkdown(title, cleanedUrl);
       sendResponse({ markdownFormat: markdownFormat });
     });
 

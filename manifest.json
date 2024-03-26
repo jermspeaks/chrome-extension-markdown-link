@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Copy Link to Markdown",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Copy webpage title and URL in Markdown format to clipboard, with clean URLs.",
   "permissions": [
     "activeTab",
