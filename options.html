@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Options - Copy Link to Markdown</title>
+  </head>
+  <body>
+    <h1>Options - Copy Link to Markdown</h1>
+    <div>
+      <label for="shortcutKey">Shortcut Key:</label>
+      <input type="text" id="shortcutKey" name="shortcutKey" readonly />
+      <p>
+        Note: Change the shortcut in the extension's shortcut settings of your
+        browser.
+      </p>
+    </div>
+    <div>
+      <label for="outputFormat">Output Format:</label>
+      <select id="outputFormat">
+        <option value="markdown">Markdown</option>
+        <!-- Additional options can be added here -->
+      </select>
+    </div>
+    <button id="saveOptions">Save</button>
+    <script src="options.js"></script>
+  </body>
+</html>
