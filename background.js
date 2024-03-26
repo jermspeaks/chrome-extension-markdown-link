@@ -43,3 +43,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     sendResponse({ cleanedUrl: cleanURL(request.url) });
   }
 });
+
+chrome.action.onClicked.addListener((tab) => {
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ["contentScript.js"],
+  });
+});

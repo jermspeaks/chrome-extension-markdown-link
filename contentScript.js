@@ -66,14 +66,41 @@ function applyStyles(element, styles) {
   }
 }
 
-// Listen for the message from the background script to initiate copying
+// This function is called to initiate the copy process
+function initiateCopyProcess() {
+  const title = document.title;
+  const url = window.location.href;
+
+  cleanURL(url, (cleanedUrl) => {
+    copyMarkdownLink(title, cleanedUrl);
+  });
+}
+
+// Listen for the message from the background script or popup to initiate copying
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.action === "copyMarkdownLink") {
+    initiateCopyProcess();
+  }
+});
+
+// Listen for messages from the popup
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.action === "getMarkdownLink") {
     const title = document.title;
     const url = window.location.href;
 
     cleanURL(url, (cleanedUrl) => {
-      copyMarkdownLink(title, cleanedUrl);
+      const markdownFormat = `[${title}](${cleanedUrl})`;
+      sendResponse({ markdownFormat: markdownFormat });
     });
+
+    return true; // Indicates you wish to send a response asynchronously
   }
 });
+
+// If the script is injected via the popup, it may be needed to trigger the copy process directly
+if (window.hasRun) {
+  initiateCopyProcess();
+} else {
+  window.hasRun = true;
+}
