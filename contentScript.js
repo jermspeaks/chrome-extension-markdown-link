@@ -11,17 +11,42 @@ function cleanURL(url, callback) {
 // Function that formats the title and URL into Markdown, adding an exclamation point for YouTube or Twitter links
 function formatMarkdown(title, cleanUrl) {
   // Array of domain patterns to match for special formatting
-  const specialDomains = ["youtube.com", "twitter.com"];
+  // const specialDomains = ["youtube.com", "twitter.com"];
 
-  // Check if the URL matches any special domains
-  const isSpecialDomain = specialDomains.some((domain) =>
-    cleanUrl.includes(domain)
-  );
+  // We need to check if the youtube URL has a video ID in it
+  const isYoutubeURL = cleanUrl.includes("youtube.com");
+  const isTwitterURL = cleanUrl.includes("twitter.com");
 
-  // Format the markdown based on whether it's a special domain
-  let markdownFormat = isSpecialDomain
-    ? `![${title}](${cleanUrl})`
-    : `[${title}](${cleanUrl})`;
+  // If the URL is a YouTube URL, we need to extract the video ID
+  let videoId = "";
+  let shortsId = "";
+  if (isYoutubeURL) {
+    const youtubeVideoRegex =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const youtubeShortsRegex = /^.*(youtu\.be\/shorts\/|shorts\/)([^#\&\?]*).*/;
+
+    const videoIdsMatch = youtubeVideoRegex.exec(cleanUrl);
+    if (videoIdsMatch && videoIdsMatch[2].length == 11) {
+      videoId = videoIdsMatch[2];
+    }
+    const shortsIdsMatch = youtubeShortsRegex.exec(cleanUrl);
+    if (shortsIdsMatch && shortsIdsMatch[2].length == 11) {
+      shortsId = shortsIdsMatch[2];
+    }
+  }
+
+  if (videoId) {
+    // If the URL is a YouTube URL and the video ID is present, we need to add an exclamation mark to the Markdown format
+    markdownFormat = `![${title}](https://youtu.be/${videoId})`;
+  } else if (shortsId) {
+    // If the URL is a YouTube URL and the video ID is present, we need to add an exclamation mark to the Markdown format
+    markdownFormat = `![${title}](https://youtube.com/watch?v=${shortsId})`;
+  } else if (isTwitterURL) {
+    // If the URL is a Twitter URL, we need to add an exclamation mark to the Markdown format
+    markdownFormat = `![${title}](${cleanUrl})`;
+  } else {
+    markdownFormat = `[${title}](${cleanUrl})`;
+  }
 
   return markdownFormat;
 }
