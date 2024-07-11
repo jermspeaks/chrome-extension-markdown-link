@@ -121,7 +121,12 @@ function copyMarkdownLink(title, cleanUrl) {
     },
     function (err) {
       // If there is an error in copying to the clipboard, show an alert
-      showAlert("Failed to copy the link to the clipboard. Error: " + err);
+      showAlert(
+        "Failed to copy the link to the clipboard. Error: " +
+          err +
+          "\n\nMarkdown format:\n" +
+          markdownFormat
+      );
     }
   );
 }
