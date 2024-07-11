@@ -15,7 +15,9 @@ function formatMarkdown(title, cleanUrl) {
 
   // We need to check if the youtube URL has a video ID in it
   const isYoutubeURL = cleanUrl.includes("youtube.com");
-  const isTwitterURL = cleanUrl.includes("twitter.com");
+  const isTwitterURL =
+    cleanUrl.includes("twitter.com") || cleanUrl.includes("x.com");
+  const isAmazonURL = cleanUrl.includes("amazon.com");
 
   // If the URL is a YouTube URL, we need to extract the video ID
   let videoId = "";
@@ -37,18 +39,76 @@ function formatMarkdown(title, cleanUrl) {
 
   if (videoId) {
     // If the URL is a YouTube URL and the video ID is present, we need to add an exclamation mark to the Markdown format
-    markdownFormat = `![${title}](https://youtu.be/${videoId})`;
-  } else if (shortsId) {
-    // If the URL is a YouTube URL and the video ID is present, we need to add an exclamation mark to the Markdown format
-    markdownFormat = `![${title}](https://youtube.com/watch?v=${shortsId})`;
-  } else if (isTwitterURL) {
-    // If the URL is a Twitter URL, we need to add an exclamation mark to the Markdown format
-    markdownFormat = `![${title}](${cleanUrl})`;
-  } else {
-    markdownFormat = `[${title}](${cleanUrl})`;
+    return `![${title}](https://youtu.be/${videoId})`;
   }
 
-  return markdownFormat;
+  if (shortsId) {
+    // If the URL is a YouTube URL and the video ID is present, we need to add an exclamation mark to the Markdown format
+    return `![${title}](https://youtube.com/watch?v=${shortsId})`;
+  }
+
+  if (isTwitterURL) {
+    // If the URL is a Twitter URL, we need to add an exclamation mark to the Markdown format
+    // replace "x.com" with "twitter.com" to avoid the "x" in the URL
+    updatedUrl = cleanUrl.replace("x.com", "twitter.com");
+
+    // Also check if there is a post and not a profile page (or other twitter page)
+    if (updatedUrl.includes("/status/")) {
+      return `![${title}](${updatedUrl})`;
+    }
+
+    // There isn't a post and treat it as a normal markdown link
+    return `[${title}](${updatedUrl})`;
+  }
+
+  if (isAmazonURL) {
+    // Remove the url parameters from the Amazon URL
+    // Remove /ref from the URL
+    const updatedUrl = cleanUrl.replace(/\?.+/g, "").replace(/\/ref.*/g, "");
+
+    // If this is a book, I want it with the format of "Amazon - author: [title](link)"
+    // Here is an example of the title: "Cooking for Geeks: Real Science, Great Cooks, and Good Food: Potter, Jeff: 9781491928059: Amazon.com: Books"
+    if (title.includes("Amazon.com: Books")) {
+      const splitTitle = title.split(":");
+      // Assumes "4" is the index from the end where it must bypass "Books", "Amazon.co", and the ISBN
+      const bookTitle = splitTitle
+        .slice(0, [splitTitle.length - 4])
+        .join(":")
+        .trim();
+      const allAuthors = splitTitle[splitTitle.length - 4].trim();
+      // In case of a single author, we just need to trim the string and join them to be in this format: "first_name last_name"
+      // In case of multiple authors, we need to make a multidimensional array with sets of two (for each author's first and last name)
+      // reverse each inner array, join them with a space, and join all names with a comma. Example format: "first_name last_name, first_name last_name"
+      const allAuthorsSplit = allAuthors.split(",");
+      const author =
+        allAuthorsSplit.length > 2
+          ? allAuthorsSplit
+              .reduce((acc, curr, index) => {
+                if (index % 2 === 0) {
+                  return [...acc, curr.trim()];
+                }
+
+                if (index % 2 === 1) {
+                  const nextAuthor = `${curr.trim()} ${acc[acc.length - 1]}`;
+                  return [...acc.slice(0, -1), nextAuthor];
+                }
+
+                return acc;
+              }, [])
+              .join(", ")
+          : allAuthorsSplit
+              .map((t) => t.trim())
+              .reverse()
+              .join(" ");
+
+      return `Book on Amazon - ${author}: [${bookTitle}](${updatedUrl})`;
+    }
+
+    // For all other Amazon URLs, I want it with the format of "Amazon - [title](link)"
+    return `Amazon - [${title}](${updatedUrl})`;
+  }
+
+  return `[${title}](${cleanUrl})`;
 }
 
 // Function to format the URL and title in Markdown and copy to clipboard
