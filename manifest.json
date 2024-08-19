@@ -24,7 +24,7 @@
     "copy-markdown-link": {
       "suggested_key": {
         "default": "Alt+Shift+C",
-        "mac": "Command+Shift+A"
+        "mac": "Command+Shift+F"
       },
       "description": "Copy Markdown Link"
     }
