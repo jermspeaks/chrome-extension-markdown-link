@@ -111,24 +111,42 @@ function formatMarkdown(title, cleanUrl) {
   return `[${title}](${cleanUrl})`;
 }
 
+function isDisplayingPDF() {
+  const contentType = document.contentType;
+  console.log(contentType)
+  return contentType === 'application/pdf';
+}
+
 // Function to format the URL and title in Markdown and copy to clipboard
 function copyMarkdownLink(title, cleanUrl) {
   const markdownFormat = formatMarkdown(title, cleanUrl);
-  navigator.clipboard.writeText(markdownFormat).then(
-    function () {
-      // If copying is successful, show a confirmation
-      showConfirmation(`Link copied in Markdown format: ${markdownFormat}`);
-    },
-    function (err) {
-      // If there is an error in copying to the clipboard, show an alert
-      showAlert(
-        "Failed to copy the link to the clipboard. Error: " +
-          err +
-          "\n\nMarkdown format:\n" +
-          markdownFormat
-      );
-    }
-  );
+
+  // if the browser is currently viewing a PDF, then show confirmation and ignore navigator clipboard
+  if (isDisplayingPDF()) {
+    showConfirmation(`Copy this link: ${markdownFormat}`);
+    return;
+  }
+  
+  // Clipboard API supported only for https
+  // See: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(markdownFormat).then(
+      function () {
+        // If copying is successful, show a confirmation
+        showConfirmation(`Link copied in Markdown format: ${markdownFormat}`);
+      },
+      function (err) {
+        // If there is an error in copying to the clipboard, show an alert
+        showAlert(`Failed to copy the link to the clipboard. Error: ${err}\n${markdownFormat}`);
+      }
+    );
+  } else {
+    // If the browser does not support the Clipboard API, fallback to showing a confirmation message
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+    showConfirmation(markdownFormat);
+
+    // NOTE: don't use document.execCommand('copy') because browsers deprecated it
+  }
 }
 
 // Function to show a confirmation message
